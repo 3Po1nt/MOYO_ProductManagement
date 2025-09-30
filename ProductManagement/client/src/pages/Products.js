@@ -7,19 +7,21 @@ import { jwtDecode } from "jwt-decode";
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [role, setRole] = useState("");
+  const [loading, setLoading] = useState(true);   // NEW loading state
   const { getAccessTokenSilently } = useAuth0();
 
-  // Determine role from token itself
+  // Combined effect for role detection and product fetching
   useEffect(() => {
-    const initRole = async () => {
+    const init = async () => {
       try {
+        setLoading(true);
         const token = await getAccessTokenSilently({
           audience: "https://moyo-product-api",
         });
+
+        // Decode token to determine role
         const decoded = jwtDecode(token);
         console.log("Decoded token:", decoded);
-
-        // Inspect permissions array for roles
         if (decoded.permissions?.includes("capturer:basic")) {
           setRole("Capturer");
         } else if (decoded.permissions?.includes("manager:basic")) {
@@ -27,33 +29,20 @@ export default function Products() {
         } else {
           setRole("");
         }
-      } catch (err) {
-        console.error("Failed to decode token:", err);
-      }
-    };
 
-    initRole();
-  }, [getAccessTokenSilently]);
-
-  // Fetch all products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const token = await getAccessTokenSilently({
-          audience: "https://moyo-product-api",
-        });
-
+        // Fetch products
         const res = await api.get("/product", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         setProducts(res.data);
       } catch (err) {
-        console.error("Failed to load products:", err);
+        console.error("Initialization error:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchProducts();
+    init();
   }, [getAccessTokenSilently]);
 
   // Delete product (Manager only)
@@ -77,23 +66,167 @@ export default function Products() {
     }
   };
 
+  // --- STYLING ---
+  const containerStyle = {
+    maxWidth: "900px",
+    margin: "40px auto",
+    padding: "30px",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "10px",
+  };
+
+  const titleStyle = {
+    color: "#333",
+    marginBottom: "25px",
+    borderBottom: "2px solid #ddd",
+    paddingBottom: "10px",
+  };
+
+  const listStyle = {
+    listStyleType: "none",
+    padding: 0,
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: "10px",
+  };
+
+  const listItemStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "15px 20px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+  };
+
+  const productInfoStyle = {
+    flexGrow: 1,
+    display: "flex",
+    gap: "20px",
+    alignItems: "center",
+  };
+
+  const nameStyle = {
+    fontWeight: "bold",
+    minWidth: "150px",
+    color: "#007bff",
+  };
+
+  const priceStyle = {
+    color: "#28a745",
+    fontWeight: "600",
+    minWidth: "80px",
+  };
+
+  const getStatusStyle = (status) => {
+    let color, bgColor;
+    switch (status) {
+      case "Approved":
+        color = "#155724";
+        bgColor = "#d4edda";
+        break;
+      case "Rejected":
+        color = "#721c24";
+        bgColor = "#f8d7da";
+        break;
+      case "PendingApproval":
+      default:
+        color = "#856404";
+        bgColor = "#fff3cd";
+        break;
+    }
+    return {
+      color,
+      backgroundColor: bgColor,
+      padding: "5px 10px",
+      borderRadius: "15px",
+      fontSize: "0.85em",
+      fontWeight: "600",
+      minWidth: "140px",
+      textAlign: "center",
+    };
+  };
+
+  const editButtonStyle = {
+    padding: "8px 15px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+    backgroundColor: "#ffc107",
+    color: "#343a40",
+    marginLeft: "10px",
+    textDecoration: "none",
+  };
+
+  const deleteButtonStyle = {
+    padding: "8px 15px",
+    borderRadius: "5px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+    backgroundColor: "#dc3545",
+    color: "white",
+    marginLeft: "10px",
+  };
+
+  const roleInfoStyle = {
+    textAlign: "center",
+    marginBottom: "20px",
+    color: "#6c757d",
+    fontSize: "1.1em",
+    padding: "10px",
+    border: "1px dashed #ced4da",
+    borderRadius: "5px",
+  };
+  // -----------------------
+
+  if (loading) {
+    return (
+      <div style={containerStyle}>
+        <h2 style={titleStyle}>Loading Products...</h2>
+        <p>Please wait while we fetch your products.</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h2>All Products</h2>
-      <ul>
+    <div style={containerStyle}>
+      <h2 style={titleStyle}>Product Catalog 🛒</h2>
+
+      {role && (
+        <p style={roleInfoStyle}>
+          Current Role: <strong>{role}</strong>
+        </p>
+      )}
+
+      <ul style={listStyle}>
         {products.map((p) => (
-          <li key={p.id}>
-            {p.name} – R{p.price} – Status: {p.status}
-            {/* Capturer can edit */}
-            {role === "Capturer" && (
-              <Link to={`/edit/${p.id}`}>
-                <button>Edit</button>
-              </Link>
-            )}
-            {/* Manager can delete */}
-            {role === "Manager" && (
-              <button onClick={() => deleteProduct(p.id)}>Delete</button>
-            )}
+          <li key={p.id} style={listItemStyle}>
+            <div style={productInfoStyle}>
+              <span style={nameStyle}>{p.name}</span>
+              <span style={priceStyle}>R{p.price.toFixed(2)}</span>
+              <span style={getStatusStyle(p.status)}>
+                {p.status.replace(/([A-Z])/g, " $1").trim()}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              {role === "Capturer" && (
+                <Link to={`/edit/${p.id}`} style={{ textDecoration: "none" }}>
+                  <button style={editButtonStyle}>✏️ Edit</button>
+                </Link>
+              )}
+              {role === "Manager" && (
+                <button
+                  style={deleteButtonStyle}
+                  onClick={() => deleteProduct(p.id)}
+                >
+                  🗑️ Delete
+                </button>
+              )}
+            </div>
           </li>
         ))}
       </ul>
