@@ -1,0 +1,8 @@
+[
+  {
+    "Id": 1,
+    "Name": "Laptop",
+    "Price": 1500.0,
+    "Status": "Approved"
+  }
+]
