@@ -1,17 +1,23 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { Auth0Provider } from "@auth0/auth0-react";
+import App from "./App";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
+const domain = "dev-tepjs6ey4y31zm8w.us.auth0.com";         // from Auth0 application settings
+const clientId = "YoPRljb2IhK8dRhMek39ndQ2h8afrVxv";       // from Auth0 SPA application
+const audience = "https://moyo-product-api";              // must match Auth0 API identifier
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <Auth0Provider
+    domain={domain}
+    clientId={clientId}
+    authorizationParams={{
+      redirect_uri: window.location.origin,
+      audience
+    }}
+    cacheLocation="localstorage"
+    useRefreshTokens
+  >
     <App />
-  </React.StrictMode>
+  </Auth0Provider>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

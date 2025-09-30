@@ -161,3 +161,13 @@ T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\client\package
 T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\client\package.json
 T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\client\public\manifest.json
 T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\data_lake.json
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\package-lock.json
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\package.json
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
+T:\Moyo\MOYO_ProductManagement\ProductManagement\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll

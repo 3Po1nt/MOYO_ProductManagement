@@ -1,0 +1,38 @@
+[
+  {
+    "Id": 1,
+    "Name": "Laptop",
+    "Price": 1500.0,
+    "Status": "Approved"
+  },
+  {
+    "Id": 2,
+    "Name": "Laptop",
+    "Price": 1500.0,
+    "Status": "Approved"
+  },
+  {
+    "Id": 3,
+    "Name": "Keyboard",
+    "Price": 1000.0,
+    "Status": "Approved"
+  },
+  {
+    "Id": 4,
+    "Name": "Headset",
+    "Price": 800.0,
+    "Status": "Approved"
+  },
+  {
+    "Id": 5,
+    "Name": "LG Monitor",
+    "Price": 1800.0,
+    "Status": "Approved"
+  },
+  {
+    "Id": 6,
+    "Name": "Guitar",
+    "Price": 5000.0,
+    "Status": "Approved"
+  }
+]

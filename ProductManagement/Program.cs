@@ -1,38 +1,96 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using ProductManagement.Data;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
+// ----------------------------
+// 1. Entity Framework Core
+// ----------------------------
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
+                      ?? "Data Source=products.db"));
+
+// ----------------------------
+// 2. Controllers
+// ----------------------------
+builder.Services.AddControllers();
+
+// ----------------------------
+// 3. CORS for React dev server
+// ----------------------------
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy => policy.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
+// ----------------------------
+// 4. Authentication (Auth0 JWT)
+// ----------------------------
+var authority = builder.Configuration["Auth0:Authority"]; // e.g. "https://<TENANT>/"
+var audience  = builder.Configuration["Auth0:Audience"];  // e.g. "https://moyo-product-api"
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = authority;
+        options.Audience  = audience;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            NameClaimType = "name",
+            RoleClaimType = "roles" // map Auth0 “roles” claim to .NET Role
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("capturer:basic",
+        policy => policy.RequireClaim("permissions", "capturer:basic"));
+
+    options.AddPolicy("manager:basic",
+        policy => policy.RequireClaim("permissions", "manager:basic"));
+});
+
+// ----------------------------
+// 5. Swagger + Bearer support
+// ----------------------------
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "ProductManagement API",
         Version = "v1"
     });
 
-    // Add Authorization header globally
-    c.AddSecurityDefinition("Authorization", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
+        Description = "Paste JWT:  Bearer {token}",
         Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Description = "Enter 'capturer-token' or 'manager-token'"
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
 
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Authorization"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
             },
             Array.Empty<string>()
@@ -40,12 +98,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Use in-memory DB for demo
-builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlite("Data Source=products.db"));
+
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();     // applies pending migrations at startup
+}
+
+// ----------------------------
+// 6. HTTP Pipeline
+// ----------------------------
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -53,6 +118,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseCors("AllowFrontend");
+app.UseRouting();
+app.UseAuthentication();   // enable JWT validation
+app.UseAuthorization();    // enforce [Authorize] on controllers
+
 app.MapControllers();
+
 app.Run();
