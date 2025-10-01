@@ -2,6 +2,7 @@
 
 A cloud-deployed product-management portal supporting a **Capturer/Manager workflow**, secure **OAuth2 / OIDC authentication**, and a **Data Lake** for quick retrieval of approved products.
 
+Live on Render: https://moyo-productmanagement.onrender.com/
 ---
 
 ## Features
