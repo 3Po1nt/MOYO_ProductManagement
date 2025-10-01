@@ -18,6 +18,7 @@ COPY ProductManagement/*.csproj ./ProductManagement/
 RUN dotnet restore ProductManagement/ProductManagement.csproj
 COPY ProductManagement/ ./ProductManagement/
 RUN dotnet publish ProductManagement/ProductManagement.csproj -c Release -o /app/publish
+COPY ProductManagement/data_lake.json ./data_lake.json
 
 # =========================
 # 3. Runtime image

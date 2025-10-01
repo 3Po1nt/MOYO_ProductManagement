@@ -6,7 +6,7 @@ using ProductManagement.Data;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddScoped<DataLakeService>();
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
 // ----------------------------
@@ -98,14 +98,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();     // applies pending migrations at startup
+    await db.Database.EnsureCreatedAsync();
+    var lake = scope.ServiceProvider.GetRequiredService<DataLakeService>();
+    await lake.SeedFromLakeAsync();
 }
 
 // ----------------------------

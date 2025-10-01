@@ -11,10 +11,12 @@ namespace ProductManagement.Controllers
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly DataLakeService _lake;
 
-        public ProductController(AppDbContext context)
+        public ProductController(AppDbContext context, DataLakeService lake)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _lake    = lake    ?? throw new ArgumentNullException(nameof(lake));
         }
 
         // --------------------------------------------------------
@@ -49,7 +51,7 @@ namespace ProductManagement.Controllers
             product.Status = "PendingApproval";
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-
+            await _lake.SyncAsync();
             return CreatedAtAction(nameof(GetProducts), new { id = product.Id }, product);
         }
 
@@ -66,7 +68,7 @@ namespace ProductManagement.Controllers
             product.Status = "PendingApproval"; // updates require re-approval
             _context.Entry(product).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-
+            await _lake.SyncAsync();
             return NoContent();
         }
 
@@ -83,7 +85,7 @@ namespace ProductManagement.Controllers
 
             product.Status = "Approved";
             await _context.SaveChangesAsync();
-
+            await _lake.SyncAsync();
             // Export approved products to Data Lake JSON file
             var approvedProducts = await _context.Products
                                                  .Where(p => p.Status == "Approved")
@@ -111,7 +113,7 @@ namespace ProductManagement.Controllers
 
             product.Status = "Rejected";
             await _context.SaveChangesAsync();
-
+            await _lake.SyncAsync();
             return Ok(product);
         }
 
@@ -128,7 +130,7 @@ namespace ProductManagement.Controllers
 
             product.Status = "SoftDeleted";
             await _context.SaveChangesAsync();
-
+            await _lake.SyncAsync();
             return NoContent();
         }
     }

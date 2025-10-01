@@ -76,7 +76,7 @@ export default function AddProduct() {
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>Add New Product 🚀</h2>
+      <h2 style={titleStyle}>Add New Product</h2>
       <input
         style={inputStyle}
         type="text"

@@ -193,7 +193,7 @@ export default function Products() {
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>Product Catalog 🛒</h2>
+      <h2 style={titleStyle}>Product Catalog</h2>
 
       {role && (
         <p style={roleInfoStyle}>
@@ -215,7 +215,7 @@ export default function Products() {
             <div style={{ display: "flex", gap: "10px" }}>
               {role === "Capturer" && (
                 <Link to={`/edit/${p.id}`} style={{ textDecoration: "none" }}>
-                  <button style={editButtonStyle}>✏️ Edit</button>
+                  <button style={editButtonStyle}>Edit</button>
                 </Link>
               )}
               {role === "Manager" && (

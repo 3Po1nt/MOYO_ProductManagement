@@ -160,7 +160,7 @@ export default function Approvals() {
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>Product Approval Queue 📝</h2>
+      <h2 style={titleStyle}>Product Approval Queue</h2>
 
       {products.length === 0 ? (
         <p style={noProductsStyle}>

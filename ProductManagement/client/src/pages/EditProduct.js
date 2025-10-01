@@ -101,7 +101,7 @@ export default function EditProduct() {
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>Edit Product Details 📝</h2>
+      <h2 style={titleStyle}>Edit Product Details</h2>
       <input
         style={inputStyle}
         placeholder="Product Name"
